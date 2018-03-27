@@ -24,18 +24,18 @@ angular.module('myApp').factory('AuthService',
 
     function getUserStatus() {
       return $http.get('/user/status')
-      // handle success
-      .success(function (data) {
-        if(data.status){
-          user = true;
-        } else {
-          user = false;
-        }
-      })
-      // handle error
-      .error(function (data) {
-        user = false;
-      });
+          // handle success
+          .success(function (data) {
+            if(data.status){
+              user = true;
+            } else {
+              user = false;
+            }
+          })
+          // handle error
+          .error(function (data) {
+            user = false;
+          });
     }
 
     function login(username, password) {
