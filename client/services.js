@@ -1,17 +1,19 @@
 angular.module('myApp').factory('AuthService',
-  ['$q', '$timeout', '$http',
-  function ($q, $timeout, $http) {
+  ['$q', '$timeout', '$http', '$cookies',
+  function ($q, $timeout, $http, $cookies) {
 
     // create user variable
     var user = null;
+    if($cookies.get('token')){
+        $http.defaults.headers.common.Authorization = $cookies.get('token');
+    }
 
     // return available functions for use in the controllers
     return ({
       isLoggedIn: isLoggedIn,
       getUserStatus: getUserStatus,
       login: login,
-      logout: logout,
-      register: register
+      logout: logout
     });
 
     function isLoggedIn() {
@@ -49,7 +51,10 @@ angular.module('myApp').factory('AuthService',
         // handle success
         .success(function (data, status) {
           if(status === 200 && data.status){
+            console.info('get hash', data.hash)
             user = true;
+            $cookies.put('token', data.hash)
+            $http.defaults.headers.common.Authorization = data.hash;
             deferred.resolve();
           } else {
             user = false;
@@ -77,6 +82,7 @@ angular.module('myApp').factory('AuthService',
         // handle success
         .success(function (data) {
           user = false;
+          $cookies.remove('token');
           deferred.resolve();
         })
         // handle error
@@ -89,31 +95,4 @@ angular.module('myApp').factory('AuthService',
       return deferred.promise;
 
     }
-
-    function register(username, password) {
-
-      // create a new instance of deferred
-      var deferred = $q.defer();
-
-      // send a post request to the server
-      $http.post('/user/register',
-        {username: username, password: password})
-        // handle success
-        .success(function (data, status) {
-          if(status === 200 && data.status){
-            deferred.resolve();
-          } else {
-            deferred.reject();
-          }
-        })
-        // handle error
-        .error(function (data) {
-          deferred.reject();
-        });
-
-      // return promise object
-      return deferred.promise;
-
-    }
-
 }]);
